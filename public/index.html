@@ -37,140 +37,25 @@
   <section class="card">
     <strong>Curl examples</strong>
     <pre>
-# Basic GET
 curl -i https://projectssl.netlify.app/
-
-# Encrypt (Netlify functions expected at /api/encrypt)
-curl -X POST https://projectssl.netlify.app/api/encrypt \
-  -H "Content-Type: application/json" \
-  -d '{"data":"hello world"}'
-
-# Decrypt (Netlify functions expected at /api/decrypt)
-curl -X POST https://projectssl.netlify.app/api/decrypt \
-  -H "Content-Type: application/json" \
-  -d '{"encryptedData":"<base64>"}'
+curl -X POST https://projectssl.netlify.app/api/encrypt -H "Content-Type: application/json" -d '{"data":"hello world"}'
+curl -X POST https://projectssl.netlify.app/api/decrypt -H "Content-Type: application/json" -d '{"encryptedData":"<base64>"}'
     </pre>
   </section>
 
-  <footer>
-    Tip: Netlify serves static files from the "publish" directory. This page expects any API to be deployed as Netlify Functions at /api/*. If you run locally, use http://localhost:3000/ or the port your server uses.
-  </footer>
+  <footer>Netlify serves static files from "public". API lives under /api/* via Functions.</footer>
 
   <script>
     const elPlain = document.getElementById('plain');
     const elEnc = document.getElementById('encrypted');
     const elRes = document.getElementById('result');
 
-    function show(obj){ elRes.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
-
-    async function postJson(path, body){
-      try {
-        const res = await fetch(path, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(body)
-        });
-        const txt = await res.text();
-        try { return { status: res.status, body: JSON.parse(txt) }; } catch(e){ return { status: res.status, body: txt }; }
-      } catch (err) {
-        return { error: err.message };
-      }
-    }
-
-    document.getElementById('btn-encrypt').addEventListener('click', async () => {
-      show('Encrypting...');
-      const r = await postJson('/api/encrypt', { data: elPlain.value });
-      if (r.body && r.body.encryptedData) elEnc.value = r.body.encryptedData;
-      show(r);
-    });
-
-    document.getElementById('btn-decrypt').addEventListener('click', async () => {
-      show('Decrypting...');
-      const r = await postJson('/api/decrypt', { encryptedData: elEnc.value });
-      show(r);
-    });
-  </script>
-</body>
-</html>
-```// filepath: /Users/yaqoobzahoorahmed/Desktop/Projects/CryptoEncryption/public/index.html
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ProjectSSL — CryptoEncryption</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Roboto, "Segoe UI", Arial; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #111; }
-    header h1 { margin: 0 0 8px; }
-    .card { border: 1px solid #e6e6e6; padding: 16px; border-radius: 8px; margin-bottom: 16px; background:#fff; }
-    label { display:block; margin:8px 0 4px; font-weight:600; }
-    textarea { width:100%; min-height:80px; padding:8px; font-family: monospace; }
-    button { margin-top:8px; padding:8px 12px; }
-    pre { background:#f6f6f6; padding:12px; border-radius:6px; overflow:auto; }
-    footer { margin-top:24px; font-size:0.9rem; color:#666; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>ProjectSSL — CryptoEncryption</h1>
-    <p>Small demo: encrypt/decrypt using the server functions. If the API is not deployed, requests will return an error.</p>
-  </header>
-
-  <section class="card">
-    <label for="plain">Plain text</label>
-    <textarea id="plain" placeholder="Type something to encrypt">hello from demo</textarea>
-    <button id="btn-encrypt">Encrypt</button>
-
-    <label for="encrypted">Encrypted (base64)</label>
-    <textarea id="encrypted" placeholder="Encrypted output will appear here"></textarea>
-    <button id="btn-decrypt">Decrypt</button>
-
-    <label>Response</label>
-    <pre id="result">{ }</pre>
-  </section>
-
-  <section class="card">
-    <strong>Curl examples</strong>
-    <pre>
-# Basic GET
-curl -i https://projectssl.netlify.app/
-
-# Encrypt (Netlify functions expected at /api/encrypt)
-curl -X POST https://projectssl.netlify.app/api/encrypt \
-  -H "Content-Type: application/json" \
-  -d '{"data":"hello world"}'
-
-# Decrypt (Netlify functions expected at /api/decrypt)
-curl -X POST https://projectssl.netlify.app/api/decrypt \
-  -H "Content-Type: application/json" \
-  -d '{"encryptedData":"<base64>"}'
-    </pre>
-  </section>
-
-  <footer>
-    Tip: Netlify serves static files from the "publish" directory. This page expects any API to be deployed as Netlify Functions at /api/*. If you run locally, use http://localhost:3000/ or the port your server uses.
-  </footer>
-
-  <script>
-    const elPlain = document.getElementById('plain');
-    const elEnc = document.getElementById('encrypted');
-    const elRes = document.getElementById('result');
-
-    function show(obj){ elRes.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
-
-    async function postJson(path, body){
-      try {
-        const res = await fetch(path, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(body)
-        });
-        const txt = await res.text();
-        try { return { status: res.status, body: JSON.parse(txt) }; } catch(e){ return { status: res.status, body: txt }; }
-      } catch (err) {
-        return { error: err.message };
-      }
-    }
+    const show = (obj) => { elRes.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); };
+    const postJson = async (path, body) => {
+      const res = await fetch(path, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+      const txt = await res.text();
+      try { return { status: res.status, body: JSON.parse(txt) }; } catch { return { status: res.status, body: txt }; }
+    };
 
     document.getElementById('btn-encrypt').addEventListener('click', async () => {
       show('Encrypting...');
