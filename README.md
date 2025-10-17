@@ -1,78 +1,169 @@
-# CryptoEncryption
+# ProjectSSL — CryptoEncryption
 
-Small Node.js project that demonstrates generating a self-signed CA and a server certificate, then using those keys for simple RSA encrypt/decrypt endpoints.
+A small, end‑to‑end demo showing how to:
+- Generate a self‑signed CA and server certificate (X.509) with RSA keys
+- Expose simple RSA‑OAEP encrypt/decrypt APIs
+- Run locally with Express and deploy serverless API endpoints on Netlify Functions
+- Handle ESM vs CJS differences, environment config, and serverless bundling constraints
 
-Quick summary:
-- ES module project (package.json contains `"type": "module"`).
-- Uses node-forge to generate keys/certs and perform RSA operations.
-- Express app exposes `/` (welcome), `/encrypt` and `/decrypt` endpoints.
-- Can run with self-signed certs (HTTPS) or plain HTTP. Works on hosted platforms that provide a PORT env var.
+Live site
+- https://projectssl.netlify.app/
+- API (via Netlify Functions): https://projectssl.netlify.app/api/encrypt and /api/decrypt
 
-## Setup
+## What this demonstrates
 
-1. Install dependencies
+- Public Key Infrastructure basics:
+  - Self‑signed CA and server certificates (X.509)
+  - Key usage for TLS-like flows and application crypto
+- Asymmetric encryption:
+  - RSA keypair generation and RSA‑OAEP encryption/decryption (node‑forge)
+  - Base64 encoding/decoding for transport
+- Node.js module systems:
+  - ES Modules in Node (type: module), and handling CJS when functions are bundled
+  - Robust path resolution for serverless functions (fallback when import.meta.url isn’t available)
+- Serverless deployment on Netlify:
+  - Functions routing with netlify.toml (rewrite /api/*)
+  - Bundling non‑code assets into functions (included_files)
+  - Working around AWS Lambda’s 4KB environment variable limit (reading PEMs from files instead of env)
+- DevOps hygiene:
+  - Environment-aware ports (PORT vs defaults)
+  - Separating local HTTPS from hosted TLS termination
+  - .gitignore and security considerations for secrets in demos
+
+## Stack
+
+- Node.js (ESM), Express (for local dev)
+- node‑forge for RSA and X.509
+- Netlify for static hosting and serverless functions
+
+## Local quick start
+
+1) Install
 ```bash
 npm install
 ```
 
-2. (Optional) Generate local certs (creates `ca-key.pem`, `ca-cert.pem`, `server-key.pem`, `server-cert.pem`)
+2) Generate certificates (creates ca/server PEMs)
 ```bash
 node generate-certs.js
 ```
 
-3. Run the server locally
+3) Run locally with Express (HTTP defaults to 3000, HTTPS 8443 if PEMs found)
 ```bash
 node server.js
-# or explicitly set PORT
-PORT=3000 node server.js
+# curl -i http://localhost:3000/
 ```
 
-## Environment / Hosting
+4) Local function testing (optional, via Netlify CLI)
+```bash
+npm i -g netlify-cli
+netlify dev
+# curl -i http://localhost:8888/api/encrypt
+```
 
-- The server respects `process.env.PORT`. If not provided, it defaults to 8443 (if TLS files found) or 3000 (HTTP).
-- TLS can be provided either as PEM files in the project (`server-key.pem`, `server-cert.pem`, `ca-cert.pem`) or via environment variables `SERVER_KEY`, `SERVER_CERT`, `CA_CERT` containing PEM text.
-- When deploying to a host that terminates TLS (Render, Vercel, Fly.io, Replit), you can run the app over plain HTTP and let the platform handle TLS.
+## API
 
-Recommended free hosts for quick testing:
-- Replit — quick dev loop + public URL
-- Render — free web service with TLS
-- Fly.io — small apps, public URL
+- POST /api/encrypt
+  - body: { "data": "<string>" }
+  - resp: { "originalData": "...", "encryptedData": "<base64>" }
 
-## API (JSON)
-
-GET /
-- Returns a simple HTML welcome.
-
-POST /encrypt
-- Body: `{ "data": "<string to encrypt>" }`
-- Response: `{ "originalData": "...", "encryptedData": "<base64>" }`
-- Returns 503 if server public key not available.
-
-POST /decrypt
-- Body: `{ "encryptedData": "<base64>" }`
-- Response: `{ "encryptedData": "...", "decryptedData": "<string>" }`
-- Returns 503 if server private key not available.
+- POST /api/decrypt
+  - body: { "encryptedData": "<base64>" }
+  - resp: { "encryptedData": "...", "decryptedData": "<string>" }
 
 ## Curl examples
 
-Local HTTP:
+- Basic check
 ```bash
-curl -i http://localhost:3000/
-curl -i -X POST http://localhost:3000/encrypt -H "Content-Type: application/json" -d '{"data":"hello"}'
+curl -i https://projectssl.netlify.app/
 ```
 
-Local HTTPS with self-signed certs:
+- Encrypt
 ```bash
-curl -i --insecure https://localhost:8443/
+curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"hello world"}' | jq .
 ```
 
-Hosted (valid TLS):
+- Roundtrip
 ```bash
-curl -i https://your-app.example.com/
+ENC=$(curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"demo"}' | jq -r .encryptedData) \
+&& curl -s -X POST https://projectssl.netlify.app/api/decrypt \
+  -H "Content-Type: application/json" \
+  -d "{\"encryptedData\":\"$ENC\"}" | jq .
 ```
 
-## Notes
-- For production use, do not keep private keys in plain files in a repo. Use your host's secret management.
-- RSA is used here for demo/encryption endpoints; consider standard TLS and modern crypto practices for real apps.
+## Certificates
 
-License: ISC
+- generate-certs.js builds:
+  - ca-key.pem, ca-cert.pem (root CA)
+  - server-key.pem, server-cert.pem (server)
+- Local server can use these for HTTPS and for RSA encrypt/decrypt endpoints.
+
+Note: For Netlify Functions, PEMs are bundled as files alongside the functions to avoid the 4KB environment variable limit.
+
+## Netlify deployment
+
+- Publish directory: public
+- Functions directory: netlify/functions
+- No build command needed
+- Branch: main
+
+netlify.toml (key parts)
+```toml
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["netlify/functions/keys/**"]
+
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/:splat"
+  status = 200
+```
+
+Functions read PEMs from files (bundled with deploy):
+- netlify/functions/keys/server-cert.pem
+- netlify/functions/keys/server-key.pem
+
+Security note: Committing private keys is only for this demo. In real projects, use a secrets manager or a host that supports secure file injection.
+
+## Architecture overview
+
+- Local:
+  - Express app (server.js) with JSON endpoints and optional self‑signed HTTPS
+  - RSA keys loaded from PEM files
+- Hosted (Netlify):
+  - Static site (public/index.html)
+  - Serverless functions for /api/*
+  - PEMs included in the function bundle via included_files
+  - Path resolution compatible with both ESM and bundled CJS
+
+## Troubleshooting I handled
+
+- SyntaxError: Cannot use import outside a module
+  - Fixed via package.json "type": "module"
+- node‑forge import variations
+  - Using default import consistently
+- Netlify env var 4KB limit for Lambda
+  - Moved PEMs from env to bundled files
+- import.meta.url undefined in bundled CJS
+  - Implemented __dirname fallback to resolve paths robustly
+- Static publish dir empty
+  - Added public/index.html
+
+## Future improvements
+
+- Replace RSA‑OAEP demo with a hybrid scheme (RSA for key exchange + AES‑GCM for payloads)
+- Rotate keys and add key IDs in responses
+- Add unit tests and GitHub Actions CI
+- Use managed secrets instead of bundling PEMs for demo
+
+## License
+
+ISC
