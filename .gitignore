@@ -1,2 +1,4 @@
 /node_modules
 node_modules/
+.env
+# *.pem  # <- comment this out to commit the certs

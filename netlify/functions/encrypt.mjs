@@ -1,4 +1,9 @@
 import nodeForge from 'node-forge';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function handler(event) {
   if (event.httpMethod !== 'POST') {
@@ -11,11 +16,9 @@ export async function handler(event) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Please provide data' }) };
     }
 
-    // Load server public key from environment variable
-    const certPem = process.env.SERVER_CERT;
-    if (!certPem) {
-      return { statusCode: 503, body: JSON.stringify({ error: 'Server certificate not configured' }) };
-    }
+    // Read cert from file (stored in repo root, accessible via relative path)
+    const certPath = path.join(__dirname, '../../server-cert.pem');
+    const certPem = fs.readFileSync(certPath, 'utf-8');
 
     const cert = nodeForge.pki.certificateFromPem(certPem);
     const publicKey = cert.publicKey;
