@@ -198,11 +198,11 @@
   <section class="section">
     <strong>cURL examples:</strong>
     <pre id="curl-examples">
-curl -i https://encryption.yaqoobahmed.com/
-curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \
+curl -i https://projectssl.netlify.app/
+curl -X POST https://projectssl.netlify.app/api/encrypt \
   -H "Content-Type: application/json" \
   -d '{"data":"hello world"}'
-curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
+curl -X POST https://projectssl.netlify.app/api/decrypt \
   -H "Content-Type: application/json" \
   -d '{"encryptedData":"<base64>"}'
     </pre>
@@ -284,14 +284,14 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
       const plainText = elPlain.value.trim();
       const encryptedData = elEnc.value.trim();
       
-      let examples = 'curl -i https://encryption.yaqoobahmed.com/\n\n';
+      let examples = 'curl -i https://projectssl.netlify.app/\n\n';
       
       if (encryptedData) {
         // Show decrypt command with actual encrypted data
         // Escape JSON properly for curl command
-        const escapedEncrypted = encryptedData.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        const escapedEncrypted = encryptedData.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"');
         examples += `# Decrypt the encrypted data:\n`;
-        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \\\n`;
+        examples += `curl -X POST https://projectssl.netlify.app/api/decrypt \\\n`;
         examples += `  -H "Content-Type: application/json" \\\n`;
         examples += `  -d '{"encryptedData":"${escapedEncrypted}"}'\n\n`;
       }
@@ -299,19 +299,19 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
       if (plainText) {
         // Show encrypt command with actual plain text
         // Escape JSON properly for curl command
-        const escapedText = plainText.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+        const escapedText = plainText.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"').replace(/'/g, "\\'");
         examples += `# Encrypt some data:\n`;
-        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \\\n`;
+        examples += `curl -X POST https://projectssl.netlify.app/api/encrypt \\\n`;
         examples += `  -H "Content-Type: application/json" \\\n`;
         examples += `  -d '{"data":"${escapedText}"}'\n`;
       }
       
       if (!plainText && !encryptedData) {
         // Default examples
-        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \\\n`;
+        examples += `curl -X POST https://projectssl.netlify.app/api/encrypt \\\n`;
         examples += `  -H "Content-Type: application/json" \\\n`;
         examples += `  -d '{"data":"hello world"}'\n\n`;
-        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \\\n`;
+        examples += `curl -X POST https://projectssl.netlify.app/api/decrypt \\\n`;
         examples += `  -H "Content-Type: application/json" \\\n`;
         examples += `  -d '{"encryptedData":"<base64>"}'`;
       }

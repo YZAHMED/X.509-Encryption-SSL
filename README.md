@@ -133,12 +133,12 @@ Response:
 
 ### Basic Health Check
 ```bash
-curl -i https://encryption.yaqoobahmed.com/
+curl -i https://projectssl.netlify.app/
 ```
 
 ### Encrypt Some Data
 ```bash
-curl -s -X POST https://encryption.yaqoobahmed.com/api/encrypt \
+curl -s -X POST https://projectssl.netlify.app/api/encrypt \
   -H "Content-Type: application/json" \
   -d '{"data":"hello world"}' | jq .
 ```
@@ -146,12 +146,12 @@ curl -s -X POST https://encryption.yaqoobahmed.com/api/encrypt \
 ### Full Roundtrip (Encrypt then Decrypt)
 ```bash
 # Encrypt
-ENC=$(curl -s -X POST https://encryption.yaqoobahmed.com/api/encrypt \
+ENC=$(curl -s -X POST https://projectssl.netlify.app/api/encrypt \
   -H "Content-Type: application/json" \
   -d '{"data":"demo message"}' | jq -r .encryptedData)
 
 # Decrypt
-curl -s -X POST https://encryption.yaqoobahmed.com/api/decrypt \
+curl -s -X POST https://projectssl.netlify.app/api/decrypt \
   -H "Content-Type: application/json" \
   -d "{\"encryptedData\":\"$ENC\"}" | jq .
 ```
