@@ -197,7 +197,7 @@
 
   <section class="section">
     <strong>cURL examples:</strong>
-    <pre>
+    <pre id="curl-examples">
 curl -i https://encryption.yaqoobahmed.com/
 curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \
   -H "Content-Type: application/json" \
@@ -266,6 +266,46 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
       }
     };
 
+    const updateCurlExamples = () => {
+      const curlExamples = document.getElementById('curl-examples');
+      const plainText = elPlain.value.trim();
+      const encryptedData = elEnc.value.trim();
+      
+      let examples = 'curl -i https://encryption.yaqoobahmed.com/\n\n';
+      
+      if (encryptedData) {
+        // Show decrypt command with actual encrypted data
+        // Escape JSON properly for curl command
+        const escapedEncrypted = encryptedData.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        examples += `# Decrypt the encrypted data:\n`;
+        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \\\n`;
+        examples += `  -H "Content-Type: application/json" \\\n`;
+        examples += `  -d '{"encryptedData":"${escapedEncrypted}"}'\n\n`;
+      }
+      
+      if (plainText) {
+        // Show encrypt command with actual plain text
+        // Escape JSON properly for curl command
+        const escapedText = plainText.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+        examples += `# Encrypt some data:\n`;
+        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \\\n`;
+        examples += `  -H "Content-Type: application/json" \\\n`;
+        examples += `  -d '{"data":"${escapedText}"}'\n`;
+      }
+      
+      if (!plainText && !encryptedData) {
+        // Default examples
+        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/encrypt \\\n`;
+        examples += `  -H "Content-Type: application/json" \\\n`;
+        examples += `  -d '{"data":"hello world"}'\n\n`;
+        examples += `curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \\\n`;
+        examples += `  -H "Content-Type: application/json" \\\n`;
+        examples += `  -d '{"encryptedData":"<base64>"}'`;
+      }
+      
+      curlExamples.textContent = examples;
+    };
+
     btnEncrypt.addEventListener('click', async () => {
       if (!elPlain.value.trim()) {
         showStatus(statusEncrypt, 'Please enter some text', 'error');
@@ -283,6 +323,7 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
           elEnc.value = r.body.encryptedData;
           showStatus(statusEncrypt, 'Encrypted successfully', 'success');
           show(r);
+          updateCurlExamples(); // Update curl examples to show decrypt command
         } else {
           showStatus(statusEncrypt, `Error: ${r.body?.error || 'Unknown error'}`, 'error');
           show(r);
@@ -313,6 +354,7 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
           elPlain.value = r.body.decryptedData;
           showStatus(statusDecrypt, 'Decrypted successfully', 'success');
           show(r);
+          updateCurlExamples(); // Update curl examples to show encrypt command
         } else {
           showStatus(statusDecrypt, `Error: ${r.body?.error || 'Unknown error'}`, 'error');
           show(r);
@@ -341,11 +383,13 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
     document.getElementById('btn-clear-encrypt').addEventListener('click', () => {
       elPlain.value = '';
       statusEncrypt.className = 'status';
+      updateCurlExamples();
     });
     
     document.getElementById('btn-clear-decrypt').addEventListener('click', () => {
       elEnc.value = '';
       statusDecrypt.className = 'status';
+      updateCurlExamples();
     });
   </script>
 </body>
