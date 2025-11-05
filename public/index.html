@@ -253,17 +253,30 @@ curl -X POST https://encryption.yaqoobahmed.com/api/decrypt \
     };
 
     const postJson = async (path, body) => {
-      const res = await fetch(path, { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify(body) 
-      });
-      const txt = await res.text();
-      try { 
-        return { status: res.status, body: JSON.parse(txt) }; 
-      } catch { 
-        return { status: res.status, body: txt }; 
+      // Try the pretty /api/* route first. If it fails (e.g., redirects not applied),
+      // fall back to /.netlify/functions/* so it works on any Netlify config.
+      const tryFetch = async (p) => {
+        const res = await fetch(p, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const txt = await res.text();
+        try {
+          return { status: res.status, body: JSON.parse(txt) };
+        } catch {
+          return { status: res.status, body: txt };
+        }
+      };
+
+      // Primary attempt
+      let result = await tryFetch(path);
+      // If 404/500 and path is /api/*, try the Netlify functions path
+      if ((result.status === 404 || result.status === 500 || result.status === 502) && path.startsWith('/api/')) {
+        const fnPath = path.replace('/api/', '/.netlify/functions/');
+        result = await tryFetch(fnPath);
       }
+      return result;
     };
 
     const updateCurlExamples = () => {
