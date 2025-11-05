@@ -156,6 +156,46 @@ curl -s -X POST https://projectssl.netlify.app/api/decrypt \
   -d "{\"encryptedData\":\"$ENC\"}" | jq .
 ```
 
+## Copy‑paste cURL snippets (with attribution)
+
+These include response headers so you can see `X-Developed-By: Yaqoob Ahmed`.
+
+### Encrypt (headers + pretty JSON)
+```bash
+curl -i -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"hello world"}'
+
+# Pretty JSON only
+curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"hello world"}' | jq .
+```
+
+### Decrypt (headers + pretty JSON)
+```bash
+ENC=$(curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"demo"}' | jq -r .encryptedData)
+
+curl -i -X POST https://projectssl.netlify.app/api/decrypt \
+  -H "Content-Type: application/json" \
+  -d "{\"encryptedData\":\"$ENC\"}"
+
+# Pretty JSON only
+curl -s -X POST https://projectssl.netlify.app/api/decrypt \
+  -H "Content-Type: application/json" \
+  -d "{\"encryptedData\":\"$ENC\"}" | jq .
+```
+
+### Optional: green “matrixy” JSON output
+```bash
+curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"matrix mode"}' \
+| jq -C | sed $'s/.*/\e[32m&\e[0m/'
+```
+
 ## Certificate Management
 
 The `generate-certs.js` script creates a complete certificate chain:

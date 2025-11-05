@@ -55,28 +55,30 @@ app.get("/", (req, res) => {
 
 app.post("/encrypt", (req, res) => {
   if (!serverPublicKey) {
-    return res.status(503).json({ error: 'Server public key not available on this instance.' });
+    return res.status(503).json({ error: 'Server public key not available on this instance.', developedBy: 'Yaqoob Ahmed' });
   }
   const { data } = req.body;
   if (!data) {
-    return res.status(400).json({ error: "Please provide data in the JSON body." });
+    return res.status(400).json({ error: "Please provide data in the JSON body.", developedBy: 'Yaqoob Ahmed' });
   }
   const encrypted = serverPublicKey.encrypt(data, 'RSA-OAEP');
   const encryptedBase64 = nodeForge.util.encode64(encrypted);
-  res.json({ originalData: data, encryptedData: encryptedBase64, note: "Encrypted with server public key." });
+  res.set('X-Developed-By', 'Yaqoob Ahmed');
+  res.json({ originalData: data, encryptedData: encryptedBase64, note: "Encrypted with server public key.", developedBy: 'Yaqoob Ahmed' });
 });
 
 app.post("/decrypt", (req, res) => {
   if (!serverPrivateKey) {
-    return res.status(503).json({ error: 'Server private key not available on this instance.' });
+    return res.status(503).json({ error: 'Server private key not available on this instance.', developedBy: 'Yaqoob Ahmed' });
   }
   const { encryptedData } = req.body;
   if (!encryptedData) {
-    return res.status(400).json({ error: "Please provide encryptedData in the JSON body." });
+    return res.status(400).json({ error: "Please provide encryptedData in the JSON body.", developedBy: 'Yaqoob Ahmed' });
   }
   const encryptedBytes = nodeForge.util.decode64(encryptedData);
   const decrypted = serverPrivateKey.decrypt(encryptedBytes, 'RSA-OAEP');
-  res.json({ encryptedData, decryptedData: decrypted });
+  res.set('X-Developed-By', 'Yaqoob Ahmed');
+  res.json({ encryptedData, decryptedData: decrypted, developedBy: 'Yaqoob Ahmed' });
 });
 
 // listen: use environment PORT if provided, else default (HTTPS 8443 or HTTP 3000)
