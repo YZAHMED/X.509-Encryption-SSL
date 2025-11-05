@@ -3,8 +3,7 @@
 A hands-on demo project I built to explore X.509 certificates, RSA encryption, and serverless deployment. This shows how to set up end-to-end encryption using self-signed certificates and deploy it as serverless functions.
 
 **Live Demo:**
-- Current: https://projectssl.netlify.app/
-- Suggested custom domain: `crypto.yaqoobahmed.com` or `ssl.yaqoobahmed.com`
+- https://encryption.yaqoobahmed.com/
 - API endpoints: `/api/encrypt` and `/api/decrypt`
 
 ## What I Built
@@ -134,12 +133,12 @@ Response:
 
 ### Basic Health Check
 ```bash
-curl -i https://projectssl.netlify.app/
+curl -i https://encryption.yaqoobahmed.com/
 ```
 
 ### Encrypt Some Data
 ```bash
-curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+curl -s -X POST https://encryption.yaqoobahmed.com/api/encrypt \
   -H "Content-Type: application/json" \
   -d '{"data":"hello world"}' | jq .
 ```
@@ -147,12 +146,12 @@ curl -s -X POST https://projectssl.netlify.app/api/encrypt \
 ### Full Roundtrip (Encrypt then Decrypt)
 ```bash
 # Encrypt
-ENC=$(curl -s -X POST https://projectssl.netlify.app/api/encrypt \
+ENC=$(curl -s -X POST https://encryption.yaqoobahmed.com/api/encrypt \
   -H "Content-Type: application/json" \
   -d '{"data":"demo message"}' | jq -r .encryptedData)
 
 # Decrypt
-curl -s -X POST https://projectssl.netlify.app/api/decrypt \
+curl -s -X POST https://encryption.yaqoobahmed.com/api/decrypt \
   -H "Content-Type: application/json" \
   -d "{\"encryptedData\":\"$ENC\"}" | jq .
 ```
@@ -257,22 +256,11 @@ Some things I'm thinking about adding:
 - Support for multiple encryption algorithms
 - Certificate expiration monitoring
 
-## Custom Domain Setup
+## Custom Domain
 
-To use a custom subdomain like `crypto.yaqoobahmed.com`:
+The project is now live at **https://encryption.yaqoobahmed.com/**
 
-1. **In Netlify Dashboard:**
-   - Go to Site settings → Domain management
-   - Add custom domain: `crypto.yaqoobahmed.com`
-   - Follow DNS configuration instructions
-
-2. **DNS Configuration:**
-   - Add a CNAME record pointing to your Netlify site
-   - Or use Netlify's nameservers if managing the whole domain
-
-3. **SSL Certificate:**
-   - Netlify automatically provisions Let's Encrypt certificates
-   - HTTPS will be enabled automatically
+The domain is configured through Netlify's domain management, with automatic SSL certificate provisioning via Let's Encrypt.
 
 ## License
 
