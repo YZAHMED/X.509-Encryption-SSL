@@ -4,70 +4,424 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ProjectSSL — CryptoEncryption</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
   <style>
-    body { font-family: system-ui, -apple-system, Roboto, "Segoe UI", Arial; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #111; }
-    header h1 { margin: 0 0 8px; }
-    .card { border: 1px solid #e6e6e6; padding: 16px; border-radius: 8px; margin-bottom: 16px; background:#fff; }
-    label { display:block; margin:8px 0 4px; font-weight:600; }
-    textarea { width:100%; min-height:80px; padding:8px; font-family: monospace; }
-    button { margin-top:8px; padding:8px 12px; }
-    pre { background:#f6f6f6; padding:12px; border-radius:6px; overflow:auto; }
-    footer { margin-top:24px; font-size:0.9rem; color:#666; }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, Roboto, "Segoe UI", Arial, sans-serif; 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      color: #111; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin: 20px 0;
+    }
+    header { 
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 { 
+      margin: 0 0 8px; 
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    .card { 
+      border: 2px solid #e6e6e6; 
+      padding: 24px; 
+      border-radius: 12px; 
+      margin-bottom: 20px; 
+      background: #fff;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+    .card h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.3rem;
+    }
+    label { 
+      display: block; 
+      margin: 12px 0 6px; 
+      font-weight: 600; 
+      color: #444;
+    }
+    textarea { 
+      width: 100%; 
+      min-height: 100px; 
+      padding: 12px; 
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 14px;
+      border: 2px solid #e6e6e6;
+      border-radius: 8px;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    button { 
+      padding: 12px 24px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: #6c757d;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+    pre { 
+      background: #f8f9fa; 
+      padding: 16px; 
+      border-radius: 8px; 
+      overflow: auto;
+      border: 1px solid #e6e6e6;
+      font-size: 0.9rem;
+      max-height: 300px;
+    }
+    .copy-btn {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+    .input-group {
+      position: relative;
+    }
+    .copy-icon {
+      position: absolute;
+      top: 40px;
+      right: 12px;
+      background: #f8f9fa;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .copy-icon:hover {
+      background: #e9ecef;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    footer { 
+      margin-top: 32px; 
+      font-size: 0.9rem; 
+      color: #666;
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #e6e6e6;
+    }
+    .example-section {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+    }
+    .example-section strong {
+      display: block;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px; }
+      header h1 { font-size: 2rem; }
+      .button-group {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>ProjectSSL — CryptoEncryption</h1>
-    <p>Small demo: encrypt/decrypt using the server functions. If the API is not deployed, requests will return an error.</p>
-  </header>
+  <div class="container">
+    <header>
+      <h1>🔐 ProjectSSL — CryptoEncryption</h1>
+      <p>Secure end-to-end encryption demo using X.509 certificates and RSA-OAEP</p>
+    </header>
 
-  <section class="card">
-    <label for="plain">Plain text</label>
-    <textarea id="plain" placeholder="Type something to encrypt">hello from demo</textarea>
-    <button id="btn-encrypt">Encrypt</button>
+    <section class="card">
+      <h2>Encryption</h2>
+      <label for="plain">Plain Text</label>
+      <div class="input-group">
+        <textarea id="plain" placeholder="Enter text to encrypt...">hello from demo</textarea>
+        <span class="copy-icon" id="copy-plain" title="Copy to clipboard">📋</span>
+      </div>
+      <div class="status" id="status-encrypt"></div>
+      <div class="button-group">
+        <button id="btn-encrypt">
+          <span class="btn-text">🔒 Encrypt</span>
+        </button>
+        <button class="btn-secondary" id="btn-clear-encrypt">Clear</button>
+      </div>
 
-    <label for="encrypted">Encrypted (base64)</label>
-    <textarea id="encrypted" placeholder="Encrypted output will appear here"></textarea>
-    <button id="btn-decrypt">Decrypt</button>
+      <label for="encrypted" style="margin-top: 24px;">Encrypted Data (Base64)</label>
+      <div class="input-group">
+        <textarea id="encrypted" placeholder="Encrypted output will appear here..." readonly></textarea>
+        <span class="copy-icon" id="copy-encrypted" title="Copy to clipboard">📋</span>
+      </div>
+      <div class="status" id="status-decrypt"></div>
+      <div class="button-group">
+        <button id="btn-decrypt">
+          <span class="btn-text">🔓 Decrypt</span>
+        </button>
+        <button class="btn-secondary" id="btn-clear-decrypt">Clear</button>
+      </div>
+    </section>
 
-    <label>Response</label>
-    <pre id="result">{ }</pre>
-  </section>
+    <section class="card">
+      <label>API Response</label>
+      <div style="position: relative;">
+        <button class="copy-btn" id="copy-response" style="margin-bottom: 8px;">📋 Copy Response</button>
+        <pre id="result">{ }</pre>
+      </div>
+    </section>
 
-  <section class="card">
-    <strong>Curl examples</strong>
-    <pre>
+    <section class="card example-section">
+      <strong>📚 API Examples (cURL)</strong>
+      <pre>
 curl -i https://projectssl.netlify.app/
-curl -X POST https://projectssl.netlify.app/api/encrypt -H "Content-Type: application/json" -d '{"data":"hello world"}'
-curl -X POST https://projectssl.netlify.app/api/decrypt -H "Content-Type: application/json" -d '{"encryptedData":"<base64>"}'
-    </pre>
-  </section>
+curl -X POST https://projectssl.netlify.app/api/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"data":"hello world"}'
+curl -X POST https://projectssl.netlify.app/api/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encryptedData":"<base64>"}'
+      </pre>
+    </section>
 
-  <footer>YZAHMED</footer>
+    <footer>
+      <p>Built with ❤️ by YZAHMED</p>
+      <p style="font-size: 0.85rem; color: #999; margin-top: 8px;">
+        Using X.509 certificates and RSA-OAEP encryption
+      </p>
+    </footer>
+  </div>
 
   <script>
+    // Console message
+    console.log('%c🔐 ProjectSSL — CryptoEncryption', 'font-size: 20px; font-weight: bold; color: #667eea;');
+    console.log('%cDeveloped by Yaqoob Ahmed', 'font-size: 14px; color: #764ba2; font-style: italic;');
+    console.log('%cUsing X.509 certificates and RSA-OAEP encryption', 'font-size: 12px; color: #666;');
+    console.log('Visit: https://projectssl.netlify.app/');
+
     const elPlain = document.getElementById('plain');
     const elEnc = document.getElementById('encrypted');
     const elRes = document.getElementById('result');
+    const statusEncrypt = document.getElementById('status-encrypt');
+    const statusDecrypt = document.getElementById('status-decrypt');
+    const btnEncrypt = document.getElementById('btn-encrypt');
+    const btnDecrypt = document.getElementById('btn-decrypt');
+    const btnTextEncrypt = btnEncrypt.querySelector('.btn-text');
+    const btnTextDecrypt = btnDecrypt.querySelector('.btn-text');
 
-    const show = (obj) => { elRes.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); };
-    const postJson = async (path, body) => {
-      const res = await fetch(path, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-      const txt = await res.text();
-      try { return { status: res.status, body: JSON.parse(txt) }; } catch { return { status: res.status, body: txt }; }
+    const showStatus = (element, message, type = 'info') => {
+      element.textContent = message;
+      element.className = `status ${type}`;
+      if (type === 'success') {
+        setTimeout(() => {
+          element.className = 'status';
+        }, 3000);
+      }
     };
 
-    document.getElementById('btn-encrypt').addEventListener('click', async () => {
+    const show = (obj) => { 
+      elRes.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); 
+    };
+
+    const copyToClipboard = async (text, element) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = element.textContent;
+        element.textContent = '✓ Copied!';
+        setTimeout(() => {
+          element.textContent = original;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    };
+
+    const postJson = async (path, body) => {
+      const res = await fetch(path, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(body) 
+      });
+      const txt = await res.text();
+      try { 
+        return { status: res.status, body: JSON.parse(txt) }; 
+      } catch { 
+        return { status: res.status, body: txt }; 
+      }
+    };
+
+    // Encrypt button
+    btnEncrypt.addEventListener('click', async () => {
+      if (!elPlain.value.trim()) {
+        showStatus(statusEncrypt, 'Please enter some text to encrypt', 'error');
+        return;
+      }
+      
+      btnEncrypt.disabled = true;
+      btnTextEncrypt.innerHTML = '<span class="loading"></span>Encrypting...';
+      showStatus(statusEncrypt, 'Encrypting...', 'info');
       show('Encrypting...');
-      const r = await postJson('/api/encrypt', { data: elPlain.value });
-      if (r.body && r.body.encryptedData) elEnc.value = r.body.encryptedData;
-      show(r);
+      
+      try {
+        const r = await postJson('/api/encrypt', { data: elPlain.value });
+        if (r.body && r.body.encryptedData) {
+          elEnc.value = r.body.encryptedData;
+          showStatus(statusEncrypt, '✓ Encrypted successfully!', 'success');
+          show(r);
+        } else {
+          showStatus(statusEncrypt, `✗ Error: ${r.body?.error || 'Unknown error'}`, 'error');
+          show(r);
+        }
+      } catch (err) {
+        showStatus(statusEncrypt, `✗ Network error: ${err.message}`, 'error');
+        show({ error: err.message });
+      } finally {
+        btnEncrypt.disabled = false;
+        btnTextEncrypt.textContent = '🔒 Encrypt';
+      }
     });
 
-    document.getElementById('btn-decrypt').addEventListener('click', async () => {
+    // Decrypt button
+    btnDecrypt.addEventListener('click', async () => {
+      if (!elEnc.value.trim()) {
+        showStatus(statusDecrypt, 'Please enter encrypted data to decrypt', 'error');
+        return;
+      }
+      
+      btnDecrypt.disabled = true;
+      btnTextDecrypt.innerHTML = '<span class="loading"></span>Decrypting...';
+      showStatus(statusDecrypt, 'Decrypting...', 'info');
       show('Decrypting...');
-      const r = await postJson('/api/decrypt', { encryptedData: elEnc.value });
-      show(r);
+      
+      try {
+        const r = await postJson('/api/decrypt', { encryptedData: elEnc.value });
+        if (r.body && r.body.decryptedData) {
+          elPlain.value = r.body.decryptedData;
+          showStatus(statusDecrypt, '✓ Decrypted successfully!', 'success');
+          show(r);
+        } else {
+          showStatus(statusDecrypt, `✗ Error: ${r.body?.error || 'Unknown error'}`, 'error');
+          show(r);
+        }
+      } catch (err) {
+        showStatus(statusDecrypt, `✗ Network error: ${err.message}`, 'error');
+        show({ error: err.message });
+      } finally {
+        btnDecrypt.disabled = false;
+        btnTextDecrypt.textContent = '🔓 Decrypt';
+      }
+    });
+
+    // Copy buttons
+    document.getElementById('copy-plain').addEventListener('click', () => {
+      copyToClipboard(elPlain.value, document.getElementById('copy-plain'));
+    });
+    
+    document.getElementById('copy-encrypted').addEventListener('click', () => {
+      copyToClipboard(elEnc.value, document.getElementById('copy-encrypted'));
+    });
+    
+    document.getElementById('copy-response').addEventListener('click', () => {
+      copyToClipboard(elRes.textContent, document.getElementById('copy-response'));
+    });
+
+    // Clear buttons
+    document.getElementById('btn-clear-encrypt').addEventListener('click', () => {
+      elPlain.value = '';
+      statusEncrypt.className = 'status';
+    });
+    
+    document.getElementById('btn-clear-decrypt').addEventListener('click', () => {
+      elEnc.value = '';
+      statusDecrypt.className = 'status';
     });
   </script>
 </body>
